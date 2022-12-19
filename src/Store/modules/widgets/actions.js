@@ -15,6 +15,7 @@ export const updateWidget = (data) => ({
   data,
 });
 
-export const getWidget = () => ({
+export const GetWidget = (data) => ({
   type: GET,
+  data,
 });

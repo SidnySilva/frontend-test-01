@@ -1,13 +1,23 @@
-import React from 'react';
-import { Header } from './Components/header';
-import { Dashboard } from './Pages/dashboard';
-import { Router } from './Router/router';
+import React from "react";
+import { ToastContainer } from "react-toastify";
+import { Router } from "./Router/routes";
 
 function App() {
   return (
     <div className="App">
-        <Dashboard/>
-    </div>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        draggable
+        theme="light"
+      />
+      <Router/>
+        </div>
   );
 }
 

@@ -1,9 +1,7 @@
 import { Box, TextField } from "@mui/material";
-import { margin } from "@mui/system";
 import logo from "../../Assets/delfos_Intelligent_maintenance.png";
-import { Img } from "./styles";
 
-export const Header = () => {
+export const Header = ({ findItemByInput }) => {
   return (
     <Box
       sx={{
@@ -15,8 +13,12 @@ export const Header = () => {
         border: "1px solid lightgray",
       }}
     >
-      <Img src={logo} alt="Delfos logo" />
-      <TextField sx={{ marginRight: 2, width: 500 }} label="Search..." />
+      <img style={{ width: 150, height: 100 }} src={logo} alt="Delfos logo" />
+      <TextField
+        onChange={(e) => findItemByInput(e.target.value)}
+        sx={{ marginRight: 2, width: 500 }}
+        label="Search..."
+      />
     </Box>
   );
 };

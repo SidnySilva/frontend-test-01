@@ -1,25 +1,23 @@
 import { CREATE, DELETE, GET, UPDATE } from "./actionType";
 
-const token = localStorage.getItem("@Widget:token") || "";
-
-const defaultState = {
-  token,
-};
+const defaultState = [];
 
 const widgetReducer = (state = defaultState, action) => {
   const { data } = action;
+  
   switch (action.type) {
     case CREATE:
-      return { ...state, data };
-
-    case DELETE:
-      return { ...state, data };
+      return [...state, data];
 
     case GET:
-      return { ...state, data };
+      return [...data];
+
+    case DELETE:
+      return state.filter((item) => item.id !== action.data);
 
     case UPDATE:
-      return { ...state, data };
+      state[state.indexOf(state.find((item) => item.id === data.id))] = data;
+      return [...state];
 
     default:
       return state;

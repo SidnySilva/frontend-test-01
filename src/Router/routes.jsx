@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import { Header } from "../Components/header";
+import { Dashboard } from "../Pages/dashboard";
 
 export const Router = () => {
   return (
     <Routes>
-      <Route path="/" element={<Header />} />
+      <Route path="/" element={<Dashboard />} />
     </Routes>
   );
 };

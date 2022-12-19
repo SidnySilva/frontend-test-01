@@ -1,16 +1,13 @@
-import { Box, FormControl, Stack, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { FaEllipsisV } from "react-icons/fa";
-import { Container } from "./styles";
+import { EditWidgetModal } from "../modals/editWidget";
 
-export const Widgets = (options) => {
+export const Widgets = (data) => {
   return (
-    <Box>
-        <FaEllipsisV />
-      <Container>
-        <HighchartsReact highcharts={Highcharts} options={options.options} />
-      </Container>
+    <Box >
+      <EditWidgetModal id={data.options.id}/>
+        <HighchartsReact highcharts={Highcharts} options={data.options} />
     </Box>
   );
 };
