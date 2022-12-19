@@ -9,7 +9,7 @@
 #
 # API (https://delfos-api.onrender.com)
 
-## User Routes
+## Widget Routes
 
 - POST- /create
     
