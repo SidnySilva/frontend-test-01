@@ -1,14 +1,6 @@
 import * as yup from "yup";
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Container,
-  InputLabel,
-  MenuItem,
-  Select,
-  SwipeableDrawer,
-  TextField,
-} from "@mui/material";
+import { Box, Button, Container } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,12 +9,15 @@ import {
   getWidgetThunk,
   updateWidgetThunk,
 } from "../../../Store/modules/widgets/thunk";
-import { EditButton } from "../../button/editButton";
+import { InputBox } from "../../input/textField";
+import { SwipeModal } from "../swipeModal";
+import { SelectField } from "../../input/selectField";
+import { graphs } from "../../../utils/graphType";
 
 export const EditWidgetModal = ({ id }) => {
-  const [state, setState] = useState(false); //Boolean useState used at toogleDrawer function
   const [findedGraph, setFindedGraph] = useState(); //It takes the clicked object
   const [selectedGraph, setSelectedGraph] = useState(); //It select the specific graphic name in a widget
+  const [selectedType, setSelectedType] = useState(); //It select the specific graphic name in a widget
 
   const dispatch = useDispatch();
   const widget = useSelector((state) => state.widgetReducer); //Array of widgets
@@ -35,19 +30,6 @@ export const EditWidgetModal = ({ id }) => {
     setFindedGraph(widget.find((el) => el.id === id)); // sets the clicked widget
   }, [widget, id]);
 
-  const toggleDrawer = (anchor, open) => (event) => {
-    //open or close widget editor box
-    if (
-      event &&
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-
-    setState({ ...state, [anchor]: open });
-  };
-
   const formSchema = yup.object().shape(
     {
       name: yup.string().notRequired(),
@@ -55,7 +37,7 @@ export const EditWidgetModal = ({ id }) => {
         .string()
         .ensure()
         .when("data", {
-          is: (data) => data,
+          is: (data, type) => data && type,
           then: yup.string().required("Select a graph"),
         }),
       data: yup
@@ -65,11 +47,18 @@ export const EditWidgetModal = ({ id }) => {
           is: (graphName) => !graphName,
           then: yup
             .string()
-            .required("Select a graph before try to edit")
+            .required("Select a graph before trying to edit")
             .matches("^[0-9*#+ ,.]+$", "Only numbers"),
         }),
+      type: yup
+        .string()
+        .ensure()
+        .when("graphName", {
+          is: (graphName) => !graphName,
+          then: yup.string().required("Select a graph before trying to edit"),
+        }),
     },
-    [["graphName", "data"]]
+    [["graphName", "data", "type"]]
   );
 
   const {
@@ -93,99 +82,83 @@ export const EditWidgetModal = ({ id }) => {
             .split(/[^a-zA-Z0-9]+/g)
             .map((el) => Number(el))
         : null,
+      type: data.type ? data.type : null,
     };
 
     dispatch(updateWidgetThunk(id, dataFormated));
   };
 
   return (
-    <>
-      <EditButton onClick={toggleDrawer("right", true)} />
+    <SwipeModal anchor={"right"} modalType={"edit"}>
+      <form onSubmit={handleSubmit(onSubmitFunction)}>
+        <Container
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: ["90vw", "70vw", 800],
+            gap: 3,
+            p: 5,
+          }}
+        >
+          <h2>Edit your widget</h2>
+          <InputBox
+            label={findedGraph && findedGraph.title.text}
+            errors={errors.name?.message}
+            register={{ ...register("name") }}
+          />
 
-      <SwipeableDrawer
-        anchor={"right"}
-        open={state["right"]}
-        onClose={toggleDrawer("right", false)}
-        onOpen={toggleDrawer("right", true)}
-      >
-        <form onSubmit={handleSubmit(onSubmitFunction)}>
-          <Container
+          <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: ['90vw','70vw',800],
+              width: "100%",
+              display: ["column", "column", "flex", "flex"],
               gap: 3,
-              p: 5,
             }}
           >
-            <h2>Edit your widget</h2>
-            <TextField
-              label={findedGraph && findedGraph.title.text}
-              variant="outlined"
-              fullWidth
-              autoComplete="off"
-              inputProps={{ style: { fontSize: 15 } }}
-              InputLabelProps={{ style: { fontSize: 15, color: "GrayText" } }}
-              error={errors.name?.message}
-              helperText={errors.name?.message}
-              {...register("name")}
-            />
-            <InputLabel htmlFor="graph-schemas">Select a graph</InputLabel>
-            <Select
-              id="graph-schemas"
-              inputProps={{
-                inputRef: (ref) => {
-                  if (!ref) return;
-                },
-              }}
+            <SelectField
+              id="graph-name"
               error={errors.graphName?.message}
               helperText={errors.graphName?.message}
-              {...register("graphName")}
-            >
-              {findedGraph &&
-                findedGraph.series.map((el, index) => (
-                  <MenuItem
-                    key={index}
-                    value={el.name}
-                    onClick={() => setSelectedGraph(el.name)}
-                  >
-                    {el.name}
-                  </MenuItem>
-                ))}
-            </Select>
-
-            <TextField
-              label={`${
-                selectedGraph
-                  ? "Actual data"
-                  : "Select a graph" /*If there is a graph selected, it will change.*/
-              }: ${
+              register={{ ...register("graphName") }}
+              setState={setSelectedGraph}
+              array={findedGraph && findedGraph.series}
+              selectName="Select a graph"
+              margin={3}
+            />
+            {selectedGraph && (
+              <SelectField
+                id="graph-type"
+                error={errors.type?.message}
+                helperText={errors.type?.message}
+                register={{ ...register("type") }}
+                setState={setSelectedType}
+                array={graphs}
+                selectName="Graph type"
+              />
+            )}
+          </Box>
+          {selectedGraph && (
+            <InputBox
+              label={`Actual data: ${
                 findedGraph &&
                 findedGraph.series.map((el) =>
                   el.name === selectedGraph ? el.data : ""
                 )
               }`}
-              variant="outlined"
-              fullWidth
-              autoComplete="off"
-              inputProps={{ style: { fontSize: 15 } }}
-              InputLabelProps={{ style: { fontSize: 15, color: "GrayText" } }}
-              error={errors.data?.message}
-              helperText={errors.data?.message}
-              {...register("data")}
+              errors={errors.data?.message}
+              register={{ ...register("data") }}
             />
-            <Button type="submit">Edit</Button>
-            <Button
-              onClick={(e) => {
-                toggleDrawer("right", false)(e);
-                dispatch(deleteWidgetThunk(id));
-              }}
-            >
-              Delete
-            </Button>
-          </Container>
-        </form>
-      </SwipeableDrawer>
-    </>
+          )}
+
+          <Button type="submit">Edit</Button>
+          <Button
+            onClick={() => {
+              dispatch(deleteWidgetThunk(id));
+            }}
+          >
+            Delete
+          </Button>
+        </Container>
+      </form>
+    </SwipeModal>
   );
 };

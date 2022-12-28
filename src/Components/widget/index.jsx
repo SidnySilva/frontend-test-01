@@ -3,11 +3,12 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { EditWidgetModal } from "../modals/editWidget";
 
-export const Widgets = (data) => {
+export const Widgets = ({options}) => {
+
   return (
     <Box >
-      <EditWidgetModal id={data.options.id}/>
-        <HighchartsReact highcharts={Highcharts} options={data.options} />
+      <EditWidgetModal id={options.id}/>
+        <HighchartsReact  highcharts={Highcharts} options={options} />
     </Box>
   );
 };
